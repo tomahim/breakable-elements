@@ -23,7 +23,8 @@ public class CubeDivider : MonoBehaviour
         shapeSize = renderer.bounds.size;
 
         Vector3 newCubeSize = cubeApproximation ? computeCubeSize() : computeRectangleSize();
-
+        Vector3 startPosition = transform.TransformPoint(new Vector3(-0.5f, 0.5f, -0.5f))
+                            + transform.TransformDirection(new Vector3(newCubeSize.x, -newCubeSize.y, newCubeSize.z) / 2.0f);
         int numCube = 1;
         for (float x = 0; x < xDivision; x++)
         {
@@ -34,19 +35,21 @@ public class CubeDivider : MonoBehaviour
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.name = "cube " + numCube;
                     numCube++;
-                    Vector3 position = new Vector3(
-                        (transform.position.x - (shapeSize.x / 2)) + newCubeSize.x / 2 + x * newCubeSize.x,
-                        (transform.position.y - (shapeSize.y / 2)) + newCubeSize.y / 2 + y * newCubeSize.y,
-                        (transform.position.z - (shapeSize.z / 2)) + newCubeSize.z / 2 + z * newCubeSize.z
-                    );
-                    cube.transform.position = position;
                     cube.transform.localScale = newCubeSize;
-                    cube.transform.SetParent(transform);
+                    cube.transform.position = (
+                        startPosition + transform.TransformDirection(
+                            new Vector3((newCubeSize.x) * x, -(newCubeSize.y) * y, (newCubeSize.z) * z)
+                        )
+                    );
+                    cube.transform.rotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, transform.rotation.z);
+                    // cube.transform.SetParent(transform);
+                    Rigidbody rb = cube.AddComponent<Rigidbody>();
+                    rb.mass = 0.2f;
                 }
             }
         }
-
-        renderer.enabled = false;
+        gameObject.SetActive(false);
+        // renderer.enabled = false;
     }
 
     private Vector3 computeCubeSize()
